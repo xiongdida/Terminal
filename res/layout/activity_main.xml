@@ -1,0 +1,275 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.XD.inverterterminal.MainActivity" >
+
+    <TextView
+        android:id="@+id/text_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_head"
+        android:textSize="12sp" />    
+	<Button 
+        android:id="@+id/btn_reset"
+        android:layout_width="70dp"
+	    android:layout_height="35dp"
+        android:layout_marginRight="20dp"
+        android:text="@string/btn_reset"
+        android:background="@drawable/red_btn"
+        android:gravity="center"
+        android:textColor="#fff"
+	    android:textSize="18sp"
+	    android:layout_alignParentTop="true"
+	    android:layout_alignParentRight="true"/>
+	
+    <RelativeLayout
+        android:id="@+id/linearLayout_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_head"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp">
+	    <LinearLayout
+	            android:id="@+id/buttons_sci"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="horizontal"
+	            android:layout_marginTop="10dp">
+		    <Button
+		        android:id="@+id/Sci_init"
+		        android:layout_width="100dp"
+		        android:layout_height="50dp"
+		        android:layout_marginLeft="10dp"
+		        android:layout_marginRight="10dp"
+		        android:onClick="onSciClick"
+		        android:text="开启串口"
+		        android:textSize="18sp" />
+		    <Button
+		        android:id="@+id/Sci_close"
+		        android:layout_width="100dp"
+		        android:layout_height="50dp"
+		        android:layout_marginLeft="10dp"
+		        android:layout_marginRight="10dp"
+		        android:onClick="onSciClick"
+		        android:text="关闭串口"
+		        android:textSize="18sp" />
+
+	    </LinearLayout>
+	    <LinearLayout
+	            android:layout_toRightOf="@id/buttons_sci"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:layout_alignParentRight="true"
+	            android:layout_marginRight="130dp"
+	            android:gravity="right" >
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/text_status"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/text_velocity"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/text_current"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+	    </LinearLayout>
+	    <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:layout_alignParentRight="true"
+	            android:layout_marginRight="20dp"
+	            android:gravity="right" >
+
+		    <TextView
+		        android:id="@+id/text_status"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="正常"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+		    <TextView
+		        android:id="@+id/text_velocity"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="0"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+		    <TextView
+		        android:id="@+id/text_current"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="0"
+		        android:textSize="18sp"
+		        android:layout_marginTop="5dp"
+	    		android:layout_marginBottom="5dp" />
+		 </LinearLayout>
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:layout_below="@id/linearLayout_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp" >
+        
+        <LinearLayout
+            android:id="@+id/linearLayout_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+
+            <Button
+                android:id="@+id/button_run"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="正转" />
+
+            <Button
+                android:id="@+id/button_reverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="反转" />
+            
+            <Button
+                android:id="@+id/button_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="停止" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_below="@id/linearLayout_2"
+            android:id="@+id/linearLayout_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+
+            <EditText
+                android:id="@+id/edtext_ram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:maxLength="2"
+                android:numeric="integer"
+                android:hint="输入频率值" />
+
+            <Button
+                android:id="@+id/button_setfrq_ram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="设定频率(RAM)" />
+
+            <EditText
+                android:id="@+id/edtext_prom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:maxLength="2"
+                android:numeric="integer"
+                android:hint="输入频率值" />
+                        
+            <Button
+                android:id="@+id/button_setfrq_prom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="设定频率(RAM和E2PROM)" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_below="@id/linearLayout_3"
+            android:id="@+id/linearLayout_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/text_ram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="当前频率值(RAM)" />
+
+            <Button
+                android:id="@+id/button_getfrq_ram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="读出频率(RAM)" />
+
+            <TextView
+                android:id="@+id/text_prom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="当前频率值(E2PROM)" />
+                        
+            <Button
+                android:id="@+id/button_getfrq_prom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:onClick="onButtonClick"
+                android:text="读出频率(RAM和E2PROM)" />
+        </LinearLayout>
+	</RelativeLayout>
+</RelativeLayout>

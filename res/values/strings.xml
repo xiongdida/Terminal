@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <string name="app_name">InverterTerminal</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="text_head">变频器参数设置为：波特率9600，奇校验，数据位8位，停止位1位，站号为0</string>
+    <string name="openSCI_sucssess">串口开启成功</string>
+    <string name="closeSCI_sucssess">关闭串口成功</string>
+    <string name="text_status">变频器状态：</string>
+    <string name="text_velocity">变频器速度为(r/min)：</string>
+    <string name="text_current">变频器电流为(A)：</string>
+    <string name="alarm_title">报警缩写：</string>
+    <string name="alarm_name">报警名称：</string>
+    <string name="alarm_content">报警内容：</string>
+    <string name="alarm_checkPoint">检查要点：</string>
+    <string name="alarm_handle">处理方法：</string>
+    <string name="alarm_contentDes">报警内容</string>
+    <string name="menu_alarm_item">报警查询</string>
+    <string name="btn_reset">复位</string>
+    <string name="loading">操作中，请稍后</string>
+    
+
+</resources>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent" >
+    
+    <View
+        android:id="@+id/alarm_view_bg1"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:background="#ddd" />
+    
+	<View
+	    android:id="@+id/alarm_view_bg2"
+	    android:layout_alignParentTop="true"
+	    android:layout_marginTop="350dp"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:background="#99222222" />
+    <Button 
+        android:id="@+id/alarm_view_hide"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="返回主界面"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/bottom_background"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"/>
+    <ImageButton
+        android:contentDescription="@null"
+        android:id="@+id/alarm_next_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_margin="5dp"
+        android:padding="10dp"
+        android:layout_toLeftOf="@id/alarm_view_hide"
+        android:gravity="center"
+        android:background="@drawable/bottom_background"
+        android:src="@drawable/alarm_next" />
+    <ImageButton
+        android:contentDescription="@null"
+        android:id="@+id/alarm_prev_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_margin="5dp"
+        android:padding="10dp"
+        android:layout_toLeftOf="@id/alarm_next_btn"
+        android:gravity="center"
+        android:background="@drawable/bottom_background"
+        android:src="@drawable/alarm_prev" />
+    <ImageView 
+        android:id="@+id/image_alarm"
+        android:layout_width="80dp"
+        android:layout_height="100dp"
+        android:layout_margin="50dp"
+        android:contentDescription="@string/alarm_contentDes"
+        android:src="@drawable/alarm"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/image_alarm"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="40dp"
+        android:orientation="vertical">
+        
+        <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@android:color/transparent"
+			android:layout_marginBottom="10dp"
+	        android:orientation="horizontal">
+	        <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="@string/alarm_title"
+		        android:paddingRight="20dp"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	        <TextView
+		        android:id="@+id/alarmTitle"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="先显示"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	    </LinearLayout>
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@android:color/transparent"
+			android:layout_marginBottom="10dp"
+	        android:orientation="horizontal">
+	        <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="@string/alarm_name"
+		        android:paddingRight="20dp"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	        <TextView
+		        android:id="@+id/alarmName"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="先显示"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	    </LinearLayout>
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@android:color/transparent"
+			android:layout_marginBottom="10dp"
+	        android:orientation="horizontal">
+	        <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="@string/alarm_content"
+		        android:paddingRight="20dp"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	        <TextView
+		        android:id="@+id/alarmContent"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="先显示"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	    </LinearLayout>
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@android:color/transparent"
+			android:layout_marginBottom="10dp"
+	        android:orientation="horizontal">
+	        <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="@string/alarm_checkPoint"
+		        android:paddingRight="20dp"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	        <TextView
+		        android:id="@+id/alarmCheckPoint"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="先显示"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	    </LinearLayout>    
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@android:color/transparent"
+			android:layout_marginBottom="10dp"
+	        android:orientation="horizontal">
+	        <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="@string/alarm_handle"
+		        android:paddingRight="20dp"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	        <TextView
+		        android:id="@+id/alarmHandle"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:text="先显示"
+		        android:textColor="#000000"
+		        android:textSize="20sp" />
+	    </LinearLayout>
+	</LinearLayout>
+
+</RelativeLayout>
