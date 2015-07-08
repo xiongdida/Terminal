@@ -2,13 +2,12 @@ package com.XD.inverterterminal;
 
 
 import com.XD.inverterterminal.model.SciModel;
-import com.XD.inverterterminal.utils.RecvUtils;
+import com.XD.inverterterminal.utils.OnOff;
 import com.XD.inverterterminal.utils.SendUtils;
 import com.XD.inverterterminal.view.AlarmView;
 import com.XD.inverterterminal.view.LoadingView;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,82 +21,39 @@ import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-	Button ButtonSciInit;
-	Button ButtonSciClose;
-	Button mButtonReset;
-	Button ButtonRun;
-	Button ButtonReverse;
-	Button ButtonStop;
+	private Button ButtonSciInit;
+	private Button ButtonSciClose;
+	private Button mButtonReset;
+	private Button ButtonRun;
+	private Button ButtonReverse;
+	private Button ButtonStop;
 	
-	TextView TextStatus;
-	TextView TextVelocity;
-	TextView TextCurrent;
+	private Button ButtonSetfrqRam;
+	private Button ButtonSetfrqProm;	
 	
-	Button ButtonSetfrqRam;
-	Button ButtonGetfrqRam;
-	Button ButtonSetfrqProm;
-	Button ButtonGetfrqProm;
+	private TextView TextStatus;
+	private TextView TextVelocity;
+	private TextView TextCurrent;
+	private TextView mTextRam;
+	private TextView mTextProm;
 	
-	EditText mEdtextRam;
-	EditText mEdtextProm;
-	
-	TextView mTextRam;
-	TextView mTextProm;
-	
+	private EditText mEdtextRam;
+	private EditText mEdtextProm;
+		
 	private AlarmView mAlarmView;
 	private SciModel sciModel;
 	
-	byte[] sciRevBuf;							// 串口接收数据
+	private RelativeLayout mLayoutMain;
+//	private LoadingView mLoading;
 	
-	private LoadingView mLoading;
-
-//	/*
-//	 * 与串口子线程通信函数
-//	 */
-//	@SuppressLint("HandlerLeak")
-//	private Handler sciHandler = new Handler()
-//	{
-//		@Override
-//		public void handleMessage(Message msg)
-//		{
-//			if (msg.what == 0x55)				// 等于0x55说明串口权限不对
-//			{
-//				Toast.makeText(MainActivity.this, "尚未获取串口权限",
-//						Toast.LENGTH_SHORT).show();
-//				sciOpened = false;
-//			}
-//			else if (msg.obj != null)			// 正常接收数据
-//			{
-//				Toast.makeText(MainActivity.this,
-//						getResources().getString(R.string.openSCI_sucssess),
-//						Toast.LENGTH_SHORT).show();
-//				sciRevBuf = ((String) msg.obj).getBytes();
-//				recv(sciRevBuf);
-//			}
-//			else
-//			{
-//				Toast.makeText(MainActivity.this, "本地串口不存在", Toast.LENGTH_SHORT)
-//						.show();
-//				sciOpened = false;
-//			}
-//		}
-//	};
-
-//	protected void recv(byte[] input) {
-//		// TODO Auto-generated method stub
-//		if(input[0] == RecvUtils.ACK)
-//			Toast.makeText(this, "数据写入成功", Toast.LENGTH_SHORT).show();
-//		else if (input[0] == RecvUtils.NAK)
-//			Toast.makeText(this, RecvUtils.getDataErr(input), Toast.LENGTH_SHORT).show();
-//		else if (input[0] == RecvUtils.STX)
-//			s = RecvUtils.getStatus(input);
-//	}
-//	
+	private int time = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -113,18 +69,15 @@ public class MainActivity extends Activity {
 		TextStatus = (TextView)findViewById(R.id.text_status);
 		TextVelocity = (TextView)findViewById(R.id.text_velocity);
 		TextCurrent = (TextView)findViewById(R.id.text_current);
-		
-		ButtonSetfrqRam = (Button)findViewById(R.id.button_setfrq_ram);
-		ButtonGetfrqRam= (Button)findViewById(R.id.button_getfrq_ram);
-		ButtonSetfrqProm= (Button)findViewById(R.id.button_setfrq_prom);
-		ButtonGetfrqProm= (Button)findViewById(R.id.button_getfrq_prom);
-		
-		mEdtextRam = (EditText)findViewById(R.id.edtext_ram);
-		mEdtextProm = (EditText)findViewById(R.id.edtext_prom);
-		
 		mTextRam = (TextView)findViewById(R.id.text_ram);
 		mTextProm = (TextView)findViewById(R.id.text_prom);
 		
+		ButtonSetfrqRam = (Button)findViewById(R.id.button_setfrq_ram);
+		ButtonSetfrqProm= (Button)findViewById(R.id.button_setfrq_prom);
+		
+		mEdtextRam = (EditText)findViewById(R.id.edtext_ram);
+		mEdtextProm = (EditText)findViewById(R.id.edtext_prom);
+				
 		mAlarmView = AlarmView.getInstance(this);
 		sciModel = new SciModel(this);
 		
@@ -133,11 +86,14 @@ public class MainActivity extends Activity {
 			@Override
 			public boolean onLongClick(View v) {
 				// TODO Auto-generated method stub
-				sciModel.reset();
+				sciModel.setSendNum(SendUtils.numReset);
 				return true;
 			}
 		});
-		mLoading = new LoadingView(this);
+		
+		mLayoutMain = (RelativeLayout)findViewById(R.id.layout_main);
+		
+//		mLoading = LoadingView.getInstance(this);
 	}
 
 	private void registerBroadcast() {
@@ -150,9 +106,8 @@ public class MainActivity extends Activity {
 			filter.addAction(SciModel.Current_Refresh);
 			filter.addAction(SciModel.OutFrq_Refresh);
 			filter.addAction(SciModel.Status_Refresh);
-			
 			filter.addAction(SciModel.Frq_Ram);
-			filter.addAction(SciModel.Frq_Prom);
+			filter.addAction(SciModel.Frq_Prom);	
 			
 			filter.addAction(SciModel.Alarm);
 			filter.addAction(SciModel.Conn_Error);
@@ -173,11 +128,13 @@ public class MainActivity extends Activity {
 			//数据代码正确
 			if (action.equals(SciModel.Data_ACK)) {
 				Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
+				mLayoutMain.setClickable(true);
 			}
 			//数据代码错误
 			else if (action.equals(SciModel.Data_NAK)) {
 				String daErr = intent.getStringExtra("dataError");
 				Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+				mLayoutMain.setClickable(true);
 			}
 			//变频器状态刷新
 			else if (action.equals(SciModel.Status_Refresh)) {
@@ -206,57 +163,67 @@ public class MainActivity extends Activity {
 			}
 			//连接错误
 			else if (action.equals(SciModel.Conn_Error)) {
-				Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+				if(++time == 10) {
+					time = 0;				
+					Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+				}
+				mLayoutMain.setClickable(true);
 			}
 			//获取报警信息
 			else if (action.equals(SciModel.Get_Alarm)) {
 				int aCode = intent.getIntExtra("alarmCode", 0);
 				mAlarmView.show(aCode);
 			}
-			mLoading.hide();
+//			mLoading.hide();
+//			mLayoutMain.setClickable(true);
 			sciModel.setSendFlag();
 		}
 	};
 	
 	public void onButtonClick(View v) {
-		switch (v.getId()) {
-		case R.id.button_run:
-			sciModel.setSendNum(SendUtils.numRun);
-			break;
-		case R.id.button_reverse:
-			sciModel.setSendNum(SendUtils.numReverse);
-			break;
-		case R.id.button_stop:
-			sciModel.setSendNum(SendUtils.numStop);
-			break;
-		case R.id.button_getfrq_ram:
-			sciModel.setSendNum(SendUtils.numGetRam);
-			break;
-		case R.id.button_getfrq_prom:
-			sciModel.setSendNum(SendUtils.numGetProm);
-			break;
-		case R.id.button_setfrq_ram:
-			if(TextUtils.isEmpty(mEdtextRam.getText()))
-				Toast.makeText(getApplicationContext(), "请输入设置频率", Toast.LENGTH_SHORT).show();
-			else {
-				int frqRam = Integer.parseInt(mEdtextRam.getText().toString());
-				if(frqRam > 50)
-					Toast.makeText(getApplicationContext(), "超过限制频率", Toast.LENGTH_SHORT).show();
-				else sciModel.SetFrqRam(frqRam);
+		if(OnOff.isSciOpened()) {
+//			mLoading.show();
+			switch (v.getId()) {
+			case R.id.button_run:
+				sciModel.setSendNum(SendUtils.numRun);
+				break;
+			case R.id.button_reverse:
+				sciModel.setSendNum(SendUtils.numReverse);
+				break;
+			case R.id.button_stop:
+				sciModel.setSendNum(SendUtils.numStop);
+				break;
+			case R.id.button_setfrq_ram:
+				if(TextUtils.isEmpty(mEdtextRam.getText()))
+					Toast.makeText(getApplicationContext(), "请输入设置频率", Toast.LENGTH_SHORT).show();
+				else {
+					int frqRam = Integer.parseInt(mEdtextRam.getText().toString());
+					if(frqRam > 50)
+						Toast.makeText(getApplicationContext(), "超过限制频率", Toast.LENGTH_SHORT).show();
+					else sciModel.setFrqRam(frqRam);
+				}
+				break;
+			case R.id.button_setfrq_prom:
+				if(TextUtils.isEmpty(mEdtextProm.getText()))
+					Toast.makeText(getApplicationContext(), "请输入设置频率", Toast.LENGTH_SHORT).show();
+				else {
+					int frqProm = Integer.parseInt(mEdtextProm.getText().toString());
+					if(frqProm > 50)
+						Toast.makeText(getApplicationContext(), "超过限制频率", Toast.LENGTH_SHORT).show();
+					else sciModel.setFrqRam(frqProm);
+				}
+				break;
+			case R.id.imgbtn_up:
+				sciModel.frqUp();
+				break;
+			case R.id.imgbtn_down:
+				sciModel.frqDown();
+				break;
 			}
-			break;
-		case R.id.button_setfrq_prom:
-			if(TextUtils.isEmpty(mEdtextProm.getText()))
-				Toast.makeText(getApplicationContext(), "请输入设置频率", Toast.LENGTH_SHORT).show();
-			else {
-				int frqProm = Integer.parseInt(mEdtextProm.getText().toString());
-				if(frqProm > 50)
-					Toast.makeText(getApplicationContext(), "超过限制频率", Toast.LENGTH_SHORT).show();
-				else sciModel.SetFrqRam(frqProm);
-			}
-			break;
+			mLayoutMain.setClickable(false);
 		}
-		mLoading.show(); 
+		else Toast.makeText(this, "请先开启串口",
+				Toast.LENGTH_SHORT).show();
 	}
 	
 	/*
@@ -265,19 +232,35 @@ public class MainActivity extends Activity {
 	public void onSciClick(View view)
 	{
 		switch(view.getId()) {
-		case R.id.Sci_init:
-			registerBroadcast();
-			sciModel.openSci();
+		case R.id.Sci_init:			
+			open();
 			break;
 		case R.id.Sci_close:
-			sciModel.closeSci();
+			close();
 			break;
 		}
 	}
 	
+	/*************开启关闭的按键处理****************/
+	private void open() {
+		if(OnOff.isSciOpened())
+			Toast.makeText(this, "串口已开启",
+					Toast.LENGTH_SHORT).show();
+		else {
+			registerBroadcast();
+			sciModel.openSci();			
+		}
+	}
+	
+	private void close() {
+		if(OnOff.isSciOpened()) {
+			unregisterReceiver(mBroadcastReceiver);
+			sciModel.closeSci();
+		}
+	}
+	
 	public void onBackPressed() {
-		sciModel.closeSci();
-		unregisterReceiver(mBroadcastReceiver);
+		close();
 		super.onBackPressed();
 	}
 	

@@ -161,7 +161,7 @@ JNIEXPORT jobject JNICALL Java_com_XD_inverterterminal_serial_1jni_SciClass_open
 		cfsetospeed(&cfg, speed);
 
 		switch (checkout)
-		//è®¾ç½®æ ¡éªŒä½
+		//ÉèÖÃĞ£ÑéÎ»
 		{
 		case OLD_CHECK:
 			cfg.c_cflag |= (PARODD | PARENB);

@@ -6,23 +6,19 @@ import java.io.IOException;
 
 import android.util.Log;
 
-import com.XD.inverterterminal.inter.OnSciCommunication;
 import com.XD.inverterterminal.serial_jni.SciClass;
+import com.XD.inverterterminal.utils.OnOff;
 
 
 
-public class RecvThread extends Thread implements OnSciCommunication{
+public class RecvThread extends Thread {
 
-	boolean openFlag;
 	private SciClass sci;
 	private FileDescriptor fd;
 
 	private OnRecvListener mListener;
 
-	byte[] buf = new byte[2048];
-
 	int num1 = 0;
-	int num2 = 0;
 	
 	public RecvThread(SciClass s, FileDescriptor f) {
 		// TODO Auto-generated constructor stub
@@ -33,9 +29,7 @@ public class RecvThread extends Thread implements OnSciCommunication{
 	@Override
 	public void run()
 	{
-		openFlag = true;
-
-		while (openFlag)
+		while (OnOff.isSciOpened())
 		{
 			boolean m = false;
 			try
@@ -56,21 +50,17 @@ public class RecvThread extends Thread implements OnSciCommunication{
 //							Log.d("receiveMsg", result.toString());
 							mListener.OnRecv(result);
 						}
-						else mListener.OnError();
+						else mListener.OnConnError();
 					}					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-//			else if (++num1 == 10000) {
-//				num1 = 0;
-//				mListener.OnError();
-//				if (++num2 == 10){
-//					num2 = 0;
-//					mListener.OnConnError();
-//				}
-//			}
+			else if (++num1 == 5000) {
+				num1 = 0;
+				mListener.OnConnError();
+			}
 		}
 	}
 
@@ -94,26 +84,14 @@ public class RecvThread extends Thread implements OnSciCommunication{
 		return data;		
 	}
 
-	@Override
 	public void open()
 	{
 		this.start();
 	}
 
-	/*
-	 * ¹Ø±ÕSCI
-	 */
-	@Override
-	public void close()
-	{
-		openFlag = false;
-		sci.close(fd);
-	}
-
 	public interface OnRecvListener
 	{
 		public void OnRecv(byte[] response);
-		public void OnError();
 		public void OnConnError();
 	}
 	

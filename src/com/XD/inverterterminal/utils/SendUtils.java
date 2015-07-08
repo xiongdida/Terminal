@@ -18,15 +18,18 @@ public class SendUtils {
 	public static final int numStatus 	= 1;
 	public static final int numOutFrq 	= 2;
 	public static final int numCurrent 	= 3;
+	public static final int numGetRam 	= 4;
+	public static final int numGetProm 	= 5;
 	
 	public static final int numRun 		= 10;
 	public static final int numReverse 	= 11;
 	public static final int numStop 	= 12;
-	public static final int numGetRam 	= 13;
-	public static final int numGetProm 	= 14;
-	public static final int numSetRam 	= 15;
-	public static final int numSetProm 	= 16;
+	public static final int numSetRam 	= 13;
+	public static final int numSetProm 	= 14;
+	public static final int numFrqUp 	= 15;
+	public static final int numFrqDown	= 16;
 	
+	public static final int numReset 	= 18;
 	public static final int numGetAlarm = 19;
 	
 

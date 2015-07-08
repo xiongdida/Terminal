@@ -2,12 +2,13 @@ package com.XD.inverterterminal.model;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 
 
 import com.XD.inverterterminal.R;
 import com.XD.inverterterminal.serial_jni.SciClass;
 import com.XD.inverterterminal.thread.RecvThread;
+import com.XD.inverterterminal.thread.SendThread;
+import com.XD.inverterterminal.utils.OnOff;
 import com.XD.inverterterminal.utils.RecvUtils;
 import com.XD.inverterterminal.utils.SendUtils;
 import com.XD.inverterterminal.thread.RecvThread.OnRecvListener;
@@ -38,16 +39,14 @@ public class SciModel {
 	public static final int SERIAL_BAUD = 9600;
 	
 	private Context mContext;
-	private boolean sciOpened = false;
 	
 	private SciClass sci;
 	private FileDescriptor fd;
 	
 	private RecvThread sciListener;
-	private conThread connectThread;
+	private SendThread connectThread;
 	
-	private boolean sendFlag = true;
-	private int sendNum;
+	private int outFrq = 0;
 	
 	public SciModel(Context context) {
 		// TODO Auto-generated constructor stub
@@ -57,60 +56,42 @@ public class SciModel {
 	public void openSci() {
 		// TODO Auto-generated method stub
 		if (new File(SERIAL_PORT).exists())
-		{
-			if (!sciOpened)
-			{
-//				exeShell("busybox chmod 777 /dev/ttyO0");
-				sci = SciClass.getInstance();
-				fd = sci.openSerialPort(new File(SERIAL_PORT), SERIAL_BAUD,
-						SciClass.OLD_CHECK);
-				if(fd != null) {
-					Toast.makeText(mContext,
-							mContext.getResources().getString(R.string.openSCI_sucssess),
-							Toast.LENGTH_SHORT).show();			
-					sciListener = new RecvThread(sci, fd);
-					sciListener.setOnRecvListener(new OnRecvListener() {						
-						@Override
-						public void OnRecv(byte[] response) {
-							// TODO Auto-generated method stub
-							Log.d("receiveMsg", new String(response));
-							parserResponse(response);
-						}
+		{			
+			sci = SciClass.getInstance();
+			fd = sci.openSerialPort(new File(SERIAL_PORT), SERIAL_BAUD,
+					SciClass.OLD_CHECK);
+			if(fd != null) {		
+				sciListener = new RecvThread(sci, fd);
+				sciListener.setOnRecvListener(new OnRecvListener() {						
+					@Override
+					public void OnRecv(byte[] response) {
+						// TODO Auto-generated method stub
+						Log.d("receiveMsg", new String(response));
+						parserResponse(response);
+					}
 
-						@Override
-						public void OnError() {
-							// TODO Auto-generated method stub
-							Log.d("Terminal", "noMsg");
-//							setSendFlag();
-							Intent errIntent = new Intent(SciModel.Conn_Error);
-							mContext.sendBroadcast(errIntent);
-						}
-
-						@Override
-						public void OnConnError() {
-							// TODO Auto-generated method stub
-							Log.d("Terminal", "conn_error");
-							Intent errIntent = new Intent(SciModel.Conn_Error);
-							mContext.sendBroadcast(errIntent);
-						}
-					});
-					connectThread = new conThread();
-					
-					//发送、接收线程打开
-					sciOpened = true;
-					sciListener.open();					
-					connectThread.start();
-					
-				}
-				else// 串口存在，打开fd=null则说明没有执行权限
-				{
-					Toast.makeText(mContext, "串口没有执行权限",
-							Toast.LENGTH_SHORT).show();
-				}
+					@Override
+					public void OnConnError() {
+						// TODO Auto-generated method stub
+						Log.d("Terminal", "conn_error");
+						Intent errIntent = new Intent(SciModel.Conn_Error);
+						mContext.sendBroadcast(errIntent);
+					}
+				});
+				connectThread = new SendThread(sci, fd);
+				
+				OnOff.setSciOpened(true);
+				Toast.makeText(mContext,
+						mContext.getResources().getString(R.string.openSCI_sucssess),
+						Toast.LENGTH_SHORT).show();	
+				
+				//发送、接收线程打开
+				connectThread.open();
+				sciListener.open();
 			}
-			else
+			else// 串口存在，打开fd=null则说明没有执行权限
 			{
-				Toast.makeText(mContext, "串口已经打开",
+				Toast.makeText(mContext, "串口没有执行权限",
 						Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -134,7 +115,7 @@ public class SciModel {
 			mContext.sendBroadcast(nakIntent);
 			break;
 		case RecvUtils.STX:
-			processData(sendNum, response);
+			processData(connectThread.getSendNum(), response);
 			break;	
 		}
 	}
@@ -144,25 +125,20 @@ public class SciModel {
 		int sData;
 		switch(i) {
 		case SendUtils.numStatus:
-//			sData = RecvUtils.getData(response);
-//			if(sData == 128) {
-//				Intent alarmIntent = new Intent(SciModel.Alarm);
-//				alarmIntent.putExtra("status", getStatus(sData));
-//				mContext.sendBroadcast(alarmIntent);
-//			} else {
-//				Intent statusIntent = new Intent(SciModel.Status_Refresh);
-//				Log.d("Terminalstatus", "" + sData);
-//				statusIntent.putExtra("status", getStatus(sData));
-//				mContext.sendBroadcast(statusIntent);
-//			}
-//			break;
 			sData = RecvUtils.getData(response);
-			Intent cur2Intent = new Intent(SciModel.Current_Refresh);
-			cur2Intent.putExtra("current", sData);
-			mContext.sendBroadcast(cur2Intent);
+			if(sData >= 128) {
+				Intent alarmIntent = new Intent(SciModel.Alarm);
+				alarmIntent.putExtra("status", "发生警报");
+				mContext.sendBroadcast(alarmIntent);
+			} else {
+				Intent statusIntent = new Intent(SciModel.Status_Refresh);
+				statusIntent.putExtra("status", "正常工作");
+				mContext.sendBroadcast(statusIntent);
+			}
 			break;
 		case SendUtils.numOutFrq:
 			sData = RecvUtils.getData(response);
+			outFrq = sData/100;
 			Intent velIntent = new Intent(SciModel.OutFrq_Refresh);
 			velIntent.putExtra("outFrq", sData);
 			mContext.sendBroadcast(velIntent);
@@ -194,92 +170,11 @@ public class SciModel {
 		}
 	}
 
-	private String getStatus(int s) {
-		// TODO Auto-generated method stub
-		switch(s) {
-		case 1:
-			return "变频器正在运行";
-		case 2:
-			return "变频器正转";
-		case 4:
-			return "变频器反转";
-		case 8:
-			return "频率达到（SU）";
-		case 16:
-			return "过负荷（OL）";		
-		case 64:
-			return "频率检测（FU）";
-		case 128:
-			return "发生报警";
-		default:
-			return null;	
-		}
-	}
- 
-	private class conThread extends Thread {		
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			sendNum = 0;
-			while(sciOpened) {
-				while(sendFlag) {
-					if(sendNum < 3)
-						sendNum++;
-					else if (sendNum == 3)
-						sendNum = 1;			
-					switch(sendNum) {
-					case SendUtils.numStatus:
-						send(SendUtils.getStatus);					
-						break;
-					case 2:
-						send(SendUtils.getOutFrq);
-						break;
-					case 3:
-						send(SendUtils.getCurrent);	
-						break;
-					case SendUtils.numRun:
-						send(SendUtils.run);
-						sendNum = 0;
-						break;
-					case SendUtils.numReverse:
-						send(SendUtils.reverse);
-						sendNum = 0;
-						break;
-					case SendUtils.numStop:
-						send(SendUtils.stop);
-						sendNum = 0;
-						break;
-					case SendUtils.numGetRam:
-						send(SendUtils.getFrqRam);
-						sendNum = 0;
-						break;
-					case SendUtils.numGetProm:
-						send(SendUtils.getFrqProm);
-						sendNum = 0;
-						break;
-					case SendUtils.numSetRam:
-						send(SendUtils.setFrqRam);
-						sendNum = 0;
-						break;
-					case SendUtils.numSetProm:
-						send(SendUtils.setFrqProm);
-						sendNum = 0;
-						break;
-					case SendUtils.numGetAlarm:
-						send(SendUtils.getAlamrCode);
-						sendNum = 0;
-						break;
-					}
-				}
-			}
-		}
-	}
-
 	public void closeSci() {
 		// TODO Auto-generated method stub
-		if(sciOpened) {
-			sciOpened = false;
-			sciListener.close();
+		if(OnOff.isSciOpened()) {						
+			OnOff.setSciOpened(false);
+			sci.close(fd);
 			Toast.makeText(mContext, "串口关闭",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -289,45 +184,11 @@ public class SciModel {
 	/************按键处理*************/
 	
 	public void setSendNum(int i) {
-		sendNum = i;
+		connectThread.setBtnNum(i);		
 	}
 	
-	public void setSendFlag() {
-		sendFlag = true;
-	}
-	
-	/************串口发送*************/
-	private void send(byte[] data) {
-		if(!sciOpened) {
-			Toast.makeText(mContext, "请先开启串口",
-					Toast.LENGTH_SHORT).show();			 
-		}
-		else {
-			sendFlag = false;
-			sciWrite(data);
-		}
-	}
-	
-	private void sciWrite(final byte[] data)
-	{
-		new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					sci.write(fd, data);
-				} catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
 	/************频率设置*************/
-	public void SetFrqRam(int frq) {
+	public void setFrqRam(int frq) {
 		// TODO Auto-generated method stub
 		byte[] num = getNumBytes(frq * 100);
 		for(int i = 0; i < num.length; i++) {
@@ -337,7 +198,7 @@ public class SciModel {
 		setSendNum(SendUtils.numSetRam);
 	}
 
-	public void SetFrqProm(int frq) {
+	public void setFrqProm(int frq) {
 		// TODO Auto-generated method stub
 		byte[] num = getNumBytes(frq * 100);
 		for(int i = 0; i < num.length; i++) {
@@ -347,14 +208,32 @@ public class SciModel {
 		setSendNum(SendUtils.numSetProm);
 	}
 	
+	public void frqUp() {
+		if(outFrq < 50) {
+			outFrq++;
+			setFrqRam(outFrq);
+		}
+		else Toast.makeText(mContext, "已到限制频率",
+				Toast.LENGTH_SHORT).show();
+	}
+	
+	public void frqDown() {
+		if(outFrq > 0) {
+			outFrq--;
+			setFrqRam(outFrq);
+		}
+		else Toast.makeText(mContext, "已到限制频率",
+				Toast.LENGTH_SHORT).show();
+	}
+	
 	private byte[] getNumBytes(int frq) {
 		String s = Integer.toHexString(frq).toUpperCase();
 		String st = String.format("%4s", s).replace(' ', '0');
 		return st.getBytes();
 	}
 
-	public void reset() {
+	public void setSendFlag() {
 		// TODO Auto-generated method stub
-		send(SendUtils.reset);
+		connectThread.setSendFlag();
 	}
 }

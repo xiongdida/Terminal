@@ -10,6 +10,8 @@
     <string name="text_status">变频器状态：</string>
     <string name="text_velocity">变频器速度为(r/min)：</string>
     <string name="text_current">变频器电流为(A)：</string>
+    <string name="text_ram_frq">RAM频率为(HZ)：</string>
+    <string name="text_prom_frq">E2PROM频率为(HZ)：</string>
     <string name="alarm_title">报警缩写：</string>
     <string name="alarm_name">报警名称：</string>
     <string name="alarm_content">报警内容：</string>
