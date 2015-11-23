@@ -2,13 +2,13 @@ package com.XD.inverterterminal.model;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 
 import com.XD.inverterterminal.R;
 import com.XD.inverterterminal.serial_jni.SciClass;
 import com.XD.inverterterminal.thread.RecvThread;
 import com.XD.inverterterminal.thread.SendThread;
-import com.XD.inverterterminal.utils.OnOff;
 import com.XD.inverterterminal.utils.RecvUtils;
 import com.XD.inverterterminal.utils.SendUtils;
 import com.XD.inverterterminal.thread.RecvThread.OnRecvListener;
@@ -38,8 +38,6 @@ public class SciModel {
 	public static final String SERIAL_PORT = "/dev/ttyO0";
 	public static final int SERIAL_BAUD = 9600;
 	
-	private Context mContext;
-	
 	private SciClass sci;
 	private FileDescriptor fd;
 	
@@ -48,20 +46,44 @@ public class SciModel {
 	
 	private int outFrq = 0;
 	
-	public SciModel(Context context) {
-		// TODO Auto-generated constructor stub
-		mContext = context;
+	//变频器运行方向
+	private int run = 0;    //1为正转  0为停止   -1为反转
+	
+	//按键标号
+	private int btnNum = 0;
+	
+	//串口开启标志
+	private boolean sciOpened = false;
+	
+	//按键按下标示
+	private boolean btnClicked = false;
+	
+	//单例模式，方便main 与 setting 两个界面的通信
+	private static SciModel instance = null;
+	private static Context mContext;
+	
+    public static SciModel getInstance(Context context){
+        if(instance == null){
+            instance = new SciModel();
+        }
+        mContext = context;
+        return instance;
+    }
+    
+	public SciModel() {
 	}
 
 	public void openSci() {
 		// TODO Auto-generated method stub
 		if (new File(SERIAL_PORT).exists())
 		{			
+			//获取串口实例
 			sci = SciClass.getInstance();
 			fd = sci.openSerialPort(new File(SERIAL_PORT), SERIAL_BAUD,
 					SciClass.OLD_CHECK);
-			if(fd != null) {		
-				sciListener = new RecvThread(sci, fd);
+			if(fd != null) {
+				//接收线程开启
+				sciListener = new RecvThread(this);
 				sciListener.setOnRecvListener(new OnRecvListener() {						
 					@Override
 					public void OnRecv(byte[] response) {
@@ -78,9 +100,11 @@ public class SciModel {
 						mContext.sendBroadcast(errIntent);
 					}
 				});
-				connectThread = new SendThread(sci, fd);
 				
-				OnOff.setSciOpened(true);
+				connectThread = new SendThread(this);
+				
+				//串口开启标志设置
+				setSciOpened(true);
 				Toast.makeText(mContext,
 						mContext.getResources().getString(R.string.openSCI_sucssess),
 						Toast.LENGTH_SHORT).show();	
@@ -100,7 +124,33 @@ public class SciModel {
 			Toast.makeText(mContext, "本地串口不存在", Toast.LENGTH_SHORT).show();
 		}
 	}
+
+	/************串口发送*************/
+	public void send(byte[] data) {
+		setSendFlag(false);
+		sciWrite(data);		
+	}
 	
+	private void sciWrite(final byte[] data)
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					sci.write(fd, data);
+				} catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+	}
+	
+	//解析获取数据
 	private void parserResponse(byte[] response) {
 		// TODO Auto-generated method stub
 		switch(response[0]) {
@@ -120,6 +170,7 @@ public class SciModel {
 		}
 	}
 
+	//收到为返回数据，获得数据
 	private void processData(int i, byte[] response) {
 		// TODO Auto-generated method stub
 		int sData;
@@ -172,9 +223,9 @@ public class SciModel {
 
 	public void closeSci() {
 		// TODO Auto-generated method stub
-		if(OnOff.isSciOpened()) {						
-			OnOff.setSciOpened(false);
+		if(isSciOpened()) {						
 			sci.close(fd);
+			setSciOpened(false);
 			Toast.makeText(mContext, "串口关闭",
 					Toast.LENGTH_SHORT).show();
 		}
@@ -182,11 +233,53 @@ public class SciModel {
 
 
 	/************按键处理*************/
-	
-	public void setSendNum(int i) {
-		connectThread.setBtnNum(i);		
+	//保存按键标号
+	public void setBtnClicked(int btn) {
+		btnClicked = true;
+		btnNum = btn;
 	}
 	
+	//返回按键标志
+	public boolean getBtnClicked() {
+		return btnClicked;
+	}
+	
+	//按键发送具体数据
+	public void btnAction() {
+		if(btnClicked){
+			switch(btnNum) {
+			case SendUtils.numRun:
+				send(SendUtils.run);
+				break;
+			case SendUtils.numReverse:
+				send(SendUtils.reverse);
+				break;
+			case SendUtils.numStop:
+				send(SendUtils.stop);
+				break;
+			case SendUtils.numGetRam:
+				send(SendUtils.getFrqRam);
+				break;
+			case SendUtils.numGetProm:
+				send(SendUtils.getFrqProm);
+				break;
+			case SendUtils.numSetRam:
+				send(SendUtils.setFrqRam);
+				break;
+			case SendUtils.numSetProm:
+				send(SendUtils.setFrqProm);
+				break;
+			case SendUtils.numReset:
+				send(SendUtils.reset);
+				break;
+			case SendUtils.numGetAlarm:
+				send(SendUtils.getAlamrCode);
+				break;
+			}
+		}
+		btnClicked = false;
+	}
+
 	/************频率设置*************/
 	public void setFrqRam(int frq) {
 		// TODO Auto-generated method stub
@@ -195,7 +288,7 @@ public class SciModel {
 			SendUtils.setFrqRam[6 + i] = num[i];
 		}
 		SendUtils.getCheckSum(SendUtils.setFrqRam);
-		setSendNum(SendUtils.numSetRam);
+		setBtnClicked(SendUtils.numSetRam);
 	}
 
 	public void setFrqProm(int frq) {
@@ -205,7 +298,7 @@ public class SciModel {
 			SendUtils.setFrqRam[6 + i] = num[i];
 		}
 		SendUtils.getCheckSum(SendUtils.setFrqRam);
-		setSendNum(SendUtils.numSetProm);
+		setBtnClicked(SendUtils.numSetProm);
 	}
 	
 	public void frqUp() {
@@ -226,14 +319,112 @@ public class SciModel {
 				Toast.LENGTH_SHORT).show();
 	}
 	
+	//发送数据的4个数据位
 	private byte[] getNumBytes(int frq) {
 		String s = Integer.toHexString(frq).toUpperCase();
 		String st = String.format("%4s", s).replace(' ', '0');
 		return st.getBytes();
 	}
 
-	public void setSendFlag() {
+	//让循环发送线程先暂停发送
+	public void setSendFlag(boolean b) {
 		// TODO Auto-generated method stub
-		connectThread.setSendFlag();
+		connectThread.setSendFlag(b);
+	}
+
+	public void setPar(int a, int value) {
+		// TODO Auto-generated method stub
+		switch(a) {
+		case 0: byte[] num0 = getNumBytes(value * 10);
+				for(int i = 0; i < num0.length; i++) {
+					SendUtils.set0[6 + i] = num0[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set0);
+				send(SendUtils.set0);
+				break;
+		case 1: byte[] num1 = getNumBytes(value * 100);
+				for(int i = 0; i < num1.length; i++) {
+					SendUtils.set1[6 + i] = num1[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set1);
+				send(SendUtils.set1);
+				break;
+		case 2: byte[] num2 = getNumBytes(value * 100);
+				for(int i = 0; i < num2.length; i++) {
+					SendUtils.set2[6 + i] = num2[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set2);
+				send(SendUtils.set2);
+				break;
+		case 7: byte[] num7 = getNumBytes(value * 10);
+				for(int i = 0; i < num7.length; i++) {
+					SendUtils.set7[6 + i] = num7[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set7);
+				send(SendUtils.set7);
+				break;
+		case 8: byte[] num8 = getNumBytes(value * 10);
+				for(int i = 0; i < num8.length; i++) {
+					SendUtils.set8[6 + i] = num8[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set8);
+				send(SendUtils.set8);
+				break;
+		case 9: byte[] num9 = getNumBytes(value * 100);
+				for(int i = 0; i < num9.length; i++) {
+					SendUtils.set9[6 + i] = num9[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set9);
+				send(SendUtils.set9);
+				break;
+		case 14: byte[] num14 = getNumBytes(value);
+				for(int i = 0; i < num14.length; i++) {
+					SendUtils.set14[6 + i] = num14[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set14);
+				send(SendUtils.set14);
+				break;
+		case 71: byte[] num71 = getNumBytes(value);
+				for(int i = 0; i < num71.length; i++) {
+					SendUtils.set71[6 + i] = num71[i];
+				}
+				SendUtils.getCheckSum(SendUtils.set71);
+				send(SendUtils.set71);
+				break;
+		}
+	}
+	
+
+	public boolean isSciOpened() {
+		return sciOpened;
+	}
+	
+	public void setSciOpened(boolean b) {
+		sciOpened = b;
+	}
+
+	public SciClass getSci() {
+		return sci;
+	}
+
+	public FileDescriptor getFd() {
+		return fd;
+	}
+
+	//变频器运动状态获取 修改
+	public int getRun() {
+		return run;
+	}
+
+	public void setRun(int run) {
+		this.run = run;
+		switch(run) {
+		case 1:	setBtnClicked(SendUtils.numRun);
+				break;
+		case -1:setBtnClicked(SendUtils.numReverse);
+				break;
+		case 0:	setBtnClicked(SendUtils.numStop);
+				break;		
+		}
 	}
 }

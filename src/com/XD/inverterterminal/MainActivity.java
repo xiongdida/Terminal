@@ -1,41 +1,49 @@
 package com.XD.inverterterminal;
 
 
+import com.XD.inverterterminal.model.LoginModel;
 import com.XD.inverterterminal.model.SciModel;
-import com.XD.inverterterminal.utils.OnOff;
 import com.XD.inverterterminal.utils.SendUtils;
 import com.XD.inverterterminal.view.AlarmView;
-import com.XD.inverterterminal.view.LoadingView;
 
+import android.R.color;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-	private Button ButtonSciInit;
-	private Button ButtonSciClose;
-	private Button mButtonReset;
-	private Button ButtonRun;
-	private Button ButtonReverse;
-	private Button ButtonStop;
+	Button ButtonSciInit;
+	Button ButtonSciClose;
+	Button mButtonReset;
+	Button ButtonRun;
+	Button ButtonReverse;
+	Button ButtonStop;
 	
-	private Button ButtonSetfrqRam;
-	private Button ButtonSetfrqProm;	
+	LinearLayout mBgRun;
+	LinearLayout mBgReverse;
+	LinearLayout mBgStop;
+	
+	Button ButtonSetfrqRam;
+	Button ButtonSetfrqProm;	
 	
 	private TextView TextStatus;
 	private TextView TextVelocity;
@@ -43,6 +51,7 @@ public class MainActivity extends Activity {
 	private TextView mTextRam;
 	private TextView mTextProm;
 	
+//	private LinearLayout mLayoutSet;
 	private EditText mEdtextRam;
 	private EditText mEdtextProm;
 		
@@ -50,6 +59,9 @@ public class MainActivity extends Activity {
 	private SciModel sciModel;
 	
 	private RelativeLayout mLayoutMain;
+	
+	private LoginModel loginModel;
+	
 //	private LoadingView mLoading;
 	
 	private int time = 0;
@@ -79,23 +91,46 @@ public class MainActivity extends Activity {
 		mEdtextProm = (EditText)findViewById(R.id.edtext_prom);
 				
 		mAlarmView = AlarmView.getInstance(this);
-		sciModel = new SciModel(this);
 		
+		sciModel = SciModel.getInstance(this);
+		
+		//需要修改为dialog！！！
 		mButtonReset.setOnLongClickListener(new OnLongClickListener() {
 			
 			@Override
 			public boolean onLongClick(View v) {
 				// TODO Auto-generated method stub
-				sciModel.setSendNum(SendUtils.numReset);
+				//要修改！！！！
+//				sciModel.setSendNum(SendUtils.numReset);
 				return true;
 			}
 		});
 		
+		//让edittext不获得焦点
 		mLayoutMain = (RelativeLayout)findViewById(R.id.layout_main);
+		mLayoutMain.setOnTouchListener(new OnTouchListener() {            
+            public boolean onTouch(View v, MotionEvent event) {                   
+            	mLayoutMain.setFocusable(true);
+            	mLayoutMain.setFocusableInTouchMode(true);
+            	mLayoutMain.requestFocus();
+            	return false;
+            }
+		});
 		
-//		mLoading = LoadingView.getInstance(this);
+		mBgRun = (LinearLayout)findViewById(R.id.bg_run);
+		mBgReverse = (LinearLayout)findViewById(R.id.bg_reverse);
+		mBgStop = (LinearLayout)findViewById(R.id.bg_stop);
+		
+		loginModel = LoginModel.getInstance(this);
 	}
 
+	//按键背景设为透明
+	private void setButtonBgTran() {
+		mBgRun.setBackgroundColor(color.transparent);
+		mBgReverse.setBackgroundColor(color.transparent);
+		mBgStop.setBackgroundColor(color.transparent);
+	}
+	
 	private void registerBroadcast() {
 		try {
 			IntentFilter filter = new IntentFilter();
@@ -159,7 +194,7 @@ public class MainActivity extends Activity {
 			//报警状态
 			else if (action.equals(SciModel.Alarm)) {
 				TextStatus.setText(intent.getStringExtra("status"));
-				sciModel.setSendNum(SendUtils.numGetAlarm);
+				sciModel.setBtnClicked(SendUtils.numGetAlarm);
 			}
 			//连接错误
 			else if (action.equals(SciModel.Conn_Error)) {
@@ -176,22 +211,37 @@ public class MainActivity extends Activity {
 			}
 //			mLoading.hide();
 //			mLayoutMain.setClickable(true);
-			sciModel.setSendFlag();
+			sciModel.setSendFlag(true);
 		}
 	};
 	
 	public void onButtonClick(View v) {
-		if(OnOff.isSciOpened()) {
+		if(sciModel.isSciOpened()) {
 //			mLoading.show();
 			switch (v.getId()) {
 			case R.id.button_run:
-				sciModel.setSendNum(SendUtils.numRun);
+				if(sciModel.getRun() < 0)
+					Toast.makeText(getApplicationContext(), "请先停止再切换方向", Toast.LENGTH_SHORT).show();
+				else {
+					setButtonBgTran();
+					mBgRun.setBackgroundColor(Color.BLACK);
+					sciModel.setRun(1);
+				}
 				break;
 			case R.id.button_reverse:
-				sciModel.setSendNum(SendUtils.numReverse);
+				if(sciModel.getRun() > 0) {
+					Toast.makeText(getApplicationContext(), "请先停止再切换方向", Toast.LENGTH_SHORT).show();
+				}
+				else {
+					setButtonBgTran();
+					mBgReverse.setBackgroundColor(Color.BLACK);
+					sciModel.setRun(-1);
+				}
 				break;
 			case R.id.button_stop:
-				sciModel.setSendNum(SendUtils.numStop);
+				setButtonBgTran();
+				mBgStop.setBackgroundColor(Color.BLACK);
+				sciModel.setRun(0);
 				break;
 			case R.id.button_setfrq_ram:
 				if(TextUtils.isEmpty(mEdtextRam.getText()))
@@ -243,17 +293,17 @@ public class MainActivity extends Activity {
 	
 	/*************开启关闭的按键处理****************/
 	private void open() {
-		if(OnOff.isSciOpened())
+		if(sciModel.isSciOpened())
 			Toast.makeText(this, "串口已开启",
 					Toast.LENGTH_SHORT).show();
 		else {
 			registerBroadcast();
-			sciModel.openSci();			
+			sciModel.openSci();		
 		}
 	}
 	
 	private void close() {
-		if(OnOff.isSciOpened()) {
+		if(sciModel.isSciOpened()) {
 			unregisterReceiver(mBroadcastReceiver);
 			sciModel.closeSci();
 		}
@@ -262,6 +312,18 @@ public class MainActivity extends Activity {
 	public void onBackPressed() {
 		close();
 		super.onBackPressed();
+	}
+	
+	private void jumpToLogin() {
+		// TODO Auto-generated method stub
+		if (loginModel.isLogedin) {
+			Intent intent = new Intent(this, SettingActivity.class);
+			startActivity(intent);
+		}
+		else {
+			Intent intent = new Intent(this, LoginActivity.class);
+			startActivity(intent);			
+		}
 	}
 	
 	@Override
@@ -277,7 +339,31 @@ public class MainActivity extends Activity {
 		case R.id.alarm_item:
 			mAlarmView.show(1);
 			break;
+		case R.id.setting:
+			jumpToLogin();
 		}
 		return true;
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		sciModel = SciModel.getInstance(this);
+		if(sciModel.isSciOpened()) {
+			registerBroadcast();
+			sciModel.setSendFlag(true);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		if(sciModel.isSciOpened()) {
+			unregisterReceiver(mBroadcastReceiver);
+			//如果询问线程有开启，暂停
+			sciModel.setSendFlag(false);
+		}
 	}
 }

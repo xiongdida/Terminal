@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <drawable name="transparent">#00000000</drawable>
     <drawable name="mid_green">#1abc9c</drawable>
     <drawable name="mid_green_highlight">#16a085</drawable>
     

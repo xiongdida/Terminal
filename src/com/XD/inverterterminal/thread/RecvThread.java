@@ -6,13 +6,13 @@ import java.io.IOException;
 
 import android.util.Log;
 
+import com.XD.inverterterminal.model.SciModel;
 import com.XD.inverterterminal.serial_jni.SciClass;
-import com.XD.inverterterminal.utils.OnOff;
-
 
 
 public class RecvThread extends Thread {
 
+	private SciModel sModel;
 	private SciClass sci;
 	private FileDescriptor fd;
 
@@ -20,16 +20,23 @@ public class RecvThread extends Thread {
 
 	int num1 = 0;
 	
-	public RecvThread(SciClass s, FileDescriptor f) {
+//	public RecvThread(SciClass s, FileDescriptor f) {
+//		// TODO Auto-generated constructor stub
+//		sci = s;
+//		fd = f;
+//	}
+
+	public RecvThread(SciModel sciModel) {
 		// TODO Auto-generated constructor stub
-		sci = s;
-		fd = f;
+		sModel = sciModel;
+		sci = sModel.getSci();
+		fd = sModel.getFd();
 	}
 
 	@Override
 	public void run()
 	{
-		while (OnOff.isSciOpened())
+		while (sModel.isSciOpened())
 		{
 			boolean m = false;
 			try

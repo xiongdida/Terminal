@@ -140,9 +140,9 @@ public class AlarmView extends RelativeLayout{
 
 	public void show() {
 		this.setVisibility(View.VISIBLE);
-		if(!isLoading)
-			this.startAnimation(mSlideInAnimation);
-		isLoading = true;
+//		if(!isLoading)
+//			this.startAnimation(mSlideInAnimation);
+//		isLoading = true;
 	}
 	
 	public void hide() {

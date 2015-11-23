@@ -68,51 +68,75 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp">
-
-            <Button
-                android:id="@+id/button_run"
-                android:layout_width="150dp"
-                android:layout_height="45dp"
-                android:layout_weight="1"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:onClick="onButtonClick"
-                android:textColor="#fff"
-                android:text="正转"
-                android:background="@drawable/btn_light_green"
-                android:textSize="20sp" />
-
-            <Button
-                android:id="@+id/button_reverse"
-                android:layout_width="150dp"
-                android:layout_height="45dp"
-                android:layout_weight="1"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="5dp"
-                android:onClick="onButtonClick"
-                android:textColor="#000"
-                android:text="反转"
-                android:textSize="20sp" />
-
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp">
+			
+	        <LinearLayout
+	            android:id="@+id/bg_run"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:background="@drawable/transparent">
+	            <Button
+	                android:id="@+id/button_run"
+	                android:layout_width="150dp"
+	                android:layout_height="45dp"
+	                android:layout_weight="1"
+	                android:layout_marginLeft="5dp"
+	                android:layout_marginRight="5dp"
+	                android:layout_marginTop="5dp"
+	                android:layout_marginBottom="5dp"
+	                android:onClick="onButtonClick"
+	                android:textColor="#fff"
+	                android:text="正转"
+	                android:background="@drawable/btn_light_green"
+	                android:textSize="20sp" />
+			</LinearLayout>
+            <LinearLayout
+                android:id="@+id/bg_reverse"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="30dp"
+		        android:layout_marginRight="5dp"
+	            android:background="@drawable/transparent">
+	            <Button
+	                android:id="@+id/button_reverse"
+	                android:layout_width="150dp"
+	                android:layout_height="41dp"
+	                android:layout_weight="1"
+	                android:layout_marginLeft="5dp"
+	                android:layout_marginRight="5dp"
+	                android:layout_marginTop="7dp"
+	                android:layout_marginBottom="7dp"
+	                android:onClick="onButtonClick"
+	                android:textColor="#fff"
+	                android:background="@drawable/btn_gray"
+	                android:text="反转"
+	                android:textSize="20sp" />
+			</LinearLayout>
         </LinearLayout>
-        <Button
-                android:id="@+id/button_stop"
-                android:layout_below="@id/layout_move"
-                android:layout_width="150dp"
-                android:layout_height="45dp"
-                android:layout_weight="1"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="5dp"
-                android:onClick="onButtonClick"
-                android:textColor="#fff"
-                android:background="@drawable/btn_red"
-                android:text="停止"
-                android:textSize="20sp" />
-        
+       	<LinearLayout
+       	    android:id="@+id/bg_stop"
+       	    android:layout_below="@id/layout_move"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+	        android:layout_marginBottom="5dp"
+            android:background="@drawable/transparent">
+	        <Button
+	                android:id="@+id/button_stop"
+	                android:layout_width="150dp"
+	                android:layout_height="45dp"
+	                android:layout_weight="1"
+	                android:layout_marginLeft="5dp"
+	                android:layout_marginRight="5dp"
+	                android:layout_marginTop="5dp"
+	                android:layout_marginBottom="5dp"
+	                android:onClick="onButtonClick"
+	                android:textColor="#fff"
+	                android:background="@drawable/btn_red"
+	                android:text="停止"
+	                android:textSize="20sp" />
+        </LinearLayout>
 	    <LinearLayout
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
@@ -292,26 +316,40 @@
             android:gravity="right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <ImageButton
-                android:contentDescription="@null" 
-                android:id="@+id/imgbtn_up"
-				android:layout_width="80dp"
-				android:layout_height="80dp"
-				android:layout_margin="5dp" 
-				android:src="@drawable/imgbtn_up"
-				android:scaleType="fitXY"
-				android:onClick="onButtonClick" />
-            <ImageButton 
-                android:contentDescription="@null"
-                android:id="@+id/imgbtn_down"
-				android:layout_width="80dp"
-				android:layout_height="80dp" 
-				android:layout_margin="5dp"
-				android:src="@drawable/imgbtn_down"
-				android:scaleType="fitXY"
-				android:onClick="onButtonClick" />
-        </LinearLayout>
+            android:orientation="horizontal">
+	        <TextView 
+	            android:layout_marginTop="50dp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:gravity="center"
+	            android:text="频率调节\n（增/减1Hz）"
+	            android:textSize="17sp"
+	            android:maxLines="2"/>
+	        <LinearLayout 
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical"
+	            android:layout_marginLeft="30dp">
+	            <ImageButton
+	                android:contentDescription="@null" 
+	                android:id="@+id/imgbtn_up"
+					android:layout_width="80dp"
+					android:layout_height="80dp"
+					android:layout_margin="5dp" 
+					android:src="@drawable/imgbtn_up"
+					android:scaleType="fitXY"
+					android:onClick="onButtonClick" />
+	            <ImageButton 
+	                android:contentDescription="@null"
+	                android:id="@+id/imgbtn_down"
+					android:layout_width="80dp"
+					android:layout_height="80dp" 
+					android:layout_margin="5dp"
+					android:src="@drawable/imgbtn_down"
+					android:scaleType="fitXY"
+					android:onClick="onButtonClick" />
+	        </LinearLayout>
+	    </LinearLayout>
         <!-- <LinearLayout
             android:layout_below="@id/linearLayout_3"
             android:id="@+id/linearLayout_4"

@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <item 
-        android:icon="@drawable/action_alarm" 
-        android:id="@+id/alarm_item" 
-        android:visible="true" 
-        android:title="@string/menu_alarm_item" 
-        android:titleCondensed="@string/menu_alarm_item" 
-        android:showAsAction="always" />
+    <item
+        android:id="@+id/menu_more"
+        android:icon="@drawable/menu_more" 
+       	android:visible="true" 
+        android:title="@string/menu_more" 
+        android:titleCondensed="@+string/menu_more" 
+        android:showAsAction="always" >
+    	<menu>
+            <item 
+                android:id="@+id/setting" 
+                android:visible="true" 
+                android:title="@string/setting"
+                android:showAsAction="always" />
+            <item
+		        android:id="@+id/alarm_item" 
+		        android:visible="true" 
+		        android:title="@string/menu_alarm_item" 
+		        android:titleCondensed="@string/menu_alarm_item" 
+		        android:showAsAction="always" />
+        </menu>
+    </item>
 </menu>

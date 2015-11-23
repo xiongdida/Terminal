@@ -76,6 +76,34 @@ public class SendUtils {
 	/**********复位指令 HFD***********/
 	public static final byte[] reset = {ENQ, NUM, NUM, 0x46, 0x44, WAITTIME, 0x39, 0x36, 0x39, 0x36, 0x46, 0x39, TAIL};
 	
+	/**********参数写入***********/
+	
+	//参数0  转矩提升 H80
+	public static final byte[] set0 = {ENQ, NUM, NUM, 0x38, 0x30, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数1  上限频率 H81
+	public static final byte[] set1 = {ENQ, NUM, NUM, 0x38, 0x31, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数2  下限频率 H82
+	public static final byte[] set2 = {ENQ, NUM, NUM, 0x38, 0x32, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数7  加速时间 H87
+	public static final byte[] set7 = {ENQ, NUM, NUM, 0x38, 0x37, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数8 减速时间 H88
+	public static final byte[] set8 = {ENQ, NUM, NUM, 0x38, 0x38, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数9 电子过电流保护 H89
+	public static final byte[] set9 = {ENQ, NUM, NUM, 0x38, 0x39, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数14 适用负荷选择 H8E
+	public static final byte[] set14 = {ENQ, NUM, NUM, 0x38, 0x45, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	//参数71 适用电机 HC7
+	public static final byte[] set71 = {ENQ, NUM, NUM, 0x43, 0x37, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
+	
+	
+	/**********校验和***********/
 	public static void getCheckSum(byte[] a) {
 		byte sum = 0x00;
 		for(int i = 1; i <= 9; i++) {
