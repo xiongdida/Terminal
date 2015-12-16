@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.XD.inverterterminal.R;
 import com.XD.inverterterminal.serial_jni.SciClass;
+import com.XD.inverterterminal.thread.ParaThread;
 import com.XD.inverterterminal.thread.RecvThread;
 import com.XD.inverterterminal.thread.SendThread;
 import com.XD.inverterterminal.utils.RecvUtils;
@@ -15,6 +16,7 @@ import com.XD.inverterterminal.thread.RecvThread.OnRecvListener;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -43,8 +45,12 @@ public class SciModel {
 	
 	private RecvThread sciListener;
 	private SendThread connectThread;
+	private ParaThread paraThread;
 	
 	private int outFrq = 0;
+	
+	//参数编号
+	private SharedPreferences.Editor editor;
 	
 	//变频器运行方向
 	private int run = 0;    //1为正转  0为停止   -1为反转
@@ -57,6 +63,9 @@ public class SciModel {
 	
 	//按键按下标示
 	private boolean btnClicked = false;
+	
+	//参数询问线程打开标志
+	private boolean paraFlag = false;
 	
 	//单例模式，方便main 与 setting 两个界面的通信
 	private static SciModel instance = null;
@@ -165,7 +174,13 @@ public class SciModel {
 			mContext.sendBroadcast(nakIntent);
 			break;
 		case RecvUtils.STX:
-			processData(connectThread.getSendNum(), response);
+			if(!paraFlag) {
+				processData(connectThread.getSendNum(), response);
+			} else {
+				SharedPreferences sPreferences = mContext.getSharedPreferences("para_info", 0);
+				editor = sPreferences.edit();
+				processPara(paraThread.getParaNum(), response);
+			}
 			break;	
 		}
 	}
@@ -219,6 +234,72 @@ public class SciModel {
 			mContext.sendBroadcast(getAlarmIntent);
 			break;
 		}
+	}
+	
+	//获取参数
+	private void processPara(int i, byte[] response) {
+		int para = RecvUtils.getData(response);
+		switch(i) {
+		case 1:
+			editor.putString("para0", para/10 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 2:
+			editor.putString("para1", para/100 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 3:
+			editor.putString("para2", para/100 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 4:
+			editor.putString("para7", (1.0f * para)/10 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 5:
+			editor.putString("para8", (1.0f * para)/10 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 6:
+			editor.putString("para9", (1.0f * para)/100 + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 7:
+			editor.putString("para14", para + "");
+			editor.commit();
+			paraThread.setSendFlag(true);
+			break;
+		case 8:
+			editor.putString("para71", para + "");
+			editor.commit();
+			paraFlag = false;
+			paraThread = null;
+			break;
+		}
+		
+	}
+	
+	public String[] getSavePara() {
+		String[] nValue = new String[8];
+		SharedPreferences sPreferences = mContext.getSharedPreferences("para_info", 0);
+		if(sPreferences.contains("para0") && sPreferences.contains("para1") && sPreferences.contains("para2") && sPreferences.contains("para7")
+		 && sPreferences.contains("para8") && sPreferences.contains("para9") && sPreferences.contains("para14") && sPreferences.contains("para71")) {
+			nValue[0] = sPreferences.getString("para0", "null");
+			nValue[1] = sPreferences.getString("para1", "null");
+			nValue[2] = sPreferences.getString("para2", "null");
+			nValue[3] = sPreferences.getString("para7", "null");
+			nValue[4] = sPreferences.getString("para8", "null");
+			nValue[5] = sPreferences.getString("para9", "null");
+			nValue[6] = sPreferences.getString("para14", "null");
+			nValue[7] = sPreferences.getString("para71", "null");
+		}
+		return nValue;
 	}
 
 	public void closeSci() {
@@ -329,9 +410,21 @@ public class SciModel {
 	//让循环发送线程先暂停发送
 	public void setSendFlag(boolean b) {
 		// TODO Auto-generated method stub
-		connectThread.setSendFlag(b);
+		if(!paraFlag)
+			connectThread.setSendFlag(b);
+		else paraThread.setSendFlag(b);
 	}
 
+	//获取参数值
+	public void getPara() {
+		if(isSciOpened()) {
+			paraFlag = true;
+			paraThread = new ParaThread(this);
+			paraThread.start();
+		}
+	}
+	
+	//设置参数值
 	public void setPar(int a, int value) {
 		// TODO Auto-generated method stub
 		switch(a) {
@@ -427,4 +520,5 @@ public class SciModel {
 				break;		
 		}
 	}
+	
 }

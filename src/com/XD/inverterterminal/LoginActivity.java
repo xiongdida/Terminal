@@ -2,12 +2,14 @@ package com.XD.inverterterminal;
 
 
 import com.XD.inverterterminal.model.LoginModel;
+import com.XD.inverterterminal.model.SciModel;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,28 +19,39 @@ import android.widget.Toast;
 public class LoginActivity extends Activity{
 	
 	private LoginModel inModel;
+	private SciModel sModel;
 //	private LoadingView mLoading;
 //	private EditText userName;
 	private EditText password;
+	private SharedPreferences.Editor editor;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 	
 
-//		getSupportActionBar().setDisplayShowHomeEnabled(false);
-//		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		inModel = LoginModel.getInstance(this);
-		
+		sModel = SciModel.getInstance(this);
 		
 		setTitle(R.string.login);
-		setContentView(R.layout.setting_login);
+		setContentView(R.layout.activity_login);
 	
 		password = (EditText) findViewById(R.id.password_edit);
 		
+		sModel.getPara();
 //		mLoading = new LoadingView(this);
 	}
 	
+//	private void getPara() {
+//		// TODO Auto-generated method stub
+//		if(sModel.isSciOpened()) {
+//			SharedPreferences sPreferences = getSharedPreferences("para_info", 0);
+//			editor = sPreferences.edit();
+//			
+//			
+//		}
+//	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();

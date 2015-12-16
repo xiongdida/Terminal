@@ -10,6 +10,7 @@ public class SendThread extends Thread {
 	
 	private int sendNum;
 	
+	private int paraNum;
 	private SciModel sModel;
 	
 	public SendThread(SciModel sci) {
@@ -88,10 +89,15 @@ public class SendThread extends Thread {
 	public void setSendFlag(boolean b) {
 		sendFlag = b;
 	}
+	
+	public boolean getSendFlag() {
+		return sendFlag;
+	}
 
 	public int getSendNum() {
 		return sendNum;
 	}
+	
 
 //	public void setSendNum(int sendNum) {
 //		this.sendNum = sendNum;

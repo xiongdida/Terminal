@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -32,9 +33,10 @@ public class SettingActivity extends Activity{
 	String[] ids = {"0", "1", "2", "7", "8", "9", "14", "71"};
 	String[] factorys = {"6%", "120Hz", "0Hz", "5s", "5s", "2.6A", "0", "14", "0"};
 	String[] ranges = {"0~30%", "0~120Hz", "0~120Hz", "0~3600s", "0~3600s", "0~500A", "0~3", "0，1，3，5，6，13，15，16，23，100，101，103，105，106，113，115，116，123"};
-	String[] values = {"0", "1", "2", "7", "8", "9", "14", "71"};
-	int[] rangess = {30, 120, 120, 3600, 3600, 500, 3, 100};
+	String[] values = {"0", "60", "0", "5", "5", "1.4", "1", "0"};
+	int[] rangess = {30, 120, 120, 3600, 3600, 500, 3, 17};
 	
+	String[] nums = {"0", "1", "3", "5", "6", "13", "15", "16", "23", "100", "101", "103", "105", "106", "113", "115", "116", "123"};
 	private ArrayList<Parameter> pas = new ArrayList<Parameter>();
 	
 	private ListView listView;
@@ -49,18 +51,19 @@ public class SettingActivity extends Activity{
 		
 		mAdapter = new ParameterAdapter(this);
 		
-		setContentView(R.layout.setting_show);
+		setContentView(R.layout.activity_setting);
 		
 		sciModel = SciModel.getInstance(this);
 		listView = (ListView)findViewById(R.id.parameters_list);
 		
+		String[] nValue = sciModel.getSavePara();
 		for(int i = 0; i <= 7; i++) {
 			Parameter p = new Parameter();
 			p.id = ids[i];
 			p.name = names[i];
 			p.factorySetting = factorys[i];
 			p.range = ranges[i];
-			p.value = values[i];
+			p.value = nValue[i];
 			pas.add(p);
 		}
 		mAdapter.array = pas;
@@ -118,19 +121,23 @@ public class SettingActivity extends Activity{
 
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View view = inflater.inflate(  
-                R.layout.layout_dialog, null);  
+                R.layout.dlg_setting, null);  
 //      TextView code = (TextView)view.findViewById(R.id.dialogCode);
-//      TextView content = (TextView)view.findViewById(R.id.dialogContent);
+		TextView content = (TextView)view.findViewById(R.id.dialogContent);
         TextView factory = (TextView)view.findViewById(R.id.dialogFactory);
-        TextView range = (TextView)view.findViewById(R.id.dialogRange);
+//        TextView range = (TextView)view.findViewById(R.id.dialogRange);
         final NumberPicker picker = (NumberPicker)view.findViewById(R.id.numPicker);
         
 //      code.setText(ids[a]);
-//		content.setText(ids[a]);
+		content.setText(names[a]);
 		factory.setText(factorys[a]);
-		range.setText(ranges[a]);
+//		range.setText(ranges[a]);
+		
         picker.setMaxValue(rangess[a]);
-        
+        if(a == 7) {
+        	picker.setDisplayedValues(nums);
+        	picker.setMinValue(0);
+        }
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("参数设置");
 		builder.setIcon(R.drawable.ic_launcher);
@@ -139,8 +146,13 @@ public class SettingActivity extends Activity{
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						Toast.makeText(getApplicationContext(), picker.getValue() + "", Toast.LENGTH_SHORT).show();						
-						sciModel.setPar(a, picker.getValue());
+						int out;
+						int s = picker.getValue();
+						if(a == 7)
+							out = Integer.parseInt(nums[picker.getValue()]);
+						else out = picker.getValue();
+						Toast.makeText(getApplicationContext(), out + "", Toast.LENGTH_SHORT).show();						
+						sciModel.setPar(a, out);
 					}
 				});
 		builder.setNegativeButton("取消",

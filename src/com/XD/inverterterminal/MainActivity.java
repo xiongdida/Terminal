@@ -8,8 +8,10 @@ import com.XD.inverterterminal.view.AlarmView;
 
 import android.R.color;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -51,7 +53,6 @@ public class MainActivity extends Activity {
 	private TextView mTextRam;
 	private TextView mTextProm;
 	
-//	private LinearLayout mLayoutSet;
 	private EditText mEdtextRam;
 	private EditText mEdtextProm;
 		
@@ -61,8 +62,6 @@ public class MainActivity extends Activity {
 	private RelativeLayout mLayoutMain;
 	
 	private LoginModel loginModel;
-	
-//	private LoadingView mLoading;
 	
 	private int time = 0;
 	
@@ -93,18 +92,6 @@ public class MainActivity extends Activity {
 		mAlarmView = AlarmView.getInstance(this);
 		
 		sciModel = SciModel.getInstance(this);
-		
-		//需要修改为dialog！！！
-		mButtonReset.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-				// TODO Auto-generated method stub
-				//要修改！！！！
-//				sciModel.setSendNum(SendUtils.numReset);
-				return true;
-			}
-		});
 		
 		//让edittext不获得焦点
 		mLayoutMain = (RelativeLayout)findViewById(R.id.layout_main);
@@ -209,8 +196,6 @@ public class MainActivity extends Activity {
 				int aCode = intent.getIntExtra("alarmCode", 0);
 				mAlarmView.show(aCode);
 			}
-//			mLoading.hide();
-//			mLayoutMain.setClickable(true);
 			sciModel.setSendFlag(true);
 		}
 	};
@@ -269,11 +254,36 @@ public class MainActivity extends Activity {
 			case R.id.imgbtn_down:
 				sciModel.frqDown();
 				break;
+			case R.id.btn_reset:
+				//跳出是否复位dialog
+				showAlertDialog();
+				break;
 			}
 			mLayoutMain.setClickable(false);
 		}
 		else Toast.makeText(this, "请先开启串口",
 				Toast.LENGTH_SHORT).show();
+	}
+	
+	private void showAlertDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("确定复位吗？");
+		builder.setIcon(R.drawable.ic_launcher);
+		builder.setPositiveButton("确定",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						sciModel.setBtnClicked(SendUtils.numReset);
+					}
+				});
+		builder.setNegativeButton("取消",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+
+					}
+				});
+		builder.show();
 	}
 	
 	/*

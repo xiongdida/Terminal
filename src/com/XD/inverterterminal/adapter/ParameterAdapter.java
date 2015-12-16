@@ -45,7 +45,7 @@ public class ParameterAdapter extends BaseAdapter{
 		try 
 		{			
 			if (convertView == null)
-				convertView = mInflater.inflate(R.layout.parameter_item, null);			
+				convertView = mInflater.inflate(R.layout.item_parameter, null);			
 			Parameter mPara = array.get(position);
 			TextView paraId = (TextView)convertView.findViewById(R.id.parameter_id);
 			TextView paraName = (TextView)convertView.findViewById(R.id.parameter_name);

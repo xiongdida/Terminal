@@ -102,6 +102,31 @@ public class SendUtils {
 	//参数71 适用电机 HC7
 	public static final byte[] set71 = {ENQ, NUM, NUM, 0x43, 0x37, WAITTIME, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, TAIL};
 	
+	/**********参数读出***********/
+	
+	//参数0  转矩提升 H00
+	public static final byte[] get0 = {ENQ, NUM, NUM, 0x30, 0x30, WAITTIME, 0x46, 0x31, TAIL};
+	
+	//参数1  上限频率 H01
+	public static final byte[] get1 = {ENQ, NUM, NUM, 0x30, 0x31, WAITTIME, 0x46, 0x32, TAIL};
+	
+	//参数2  下限频率 H02
+	public static final byte[] get2 = {ENQ, NUM, NUM, 0x30, 0x32, WAITTIME, 0x46, 0x33, TAIL};
+	
+	//参数7  加速时间 H07
+	public static final byte[] get7 = {ENQ, NUM, NUM, 0x30, 0x37, WAITTIME, 0x46, 0x38, TAIL};
+	
+	//参数8 减速时间 H08
+	public static final byte[] get8 = {ENQ, NUM, NUM, 0x30, 0x38, WAITTIME, 0x46, 0x39, TAIL};
+	
+	//参数9 电子过电流保护 H09
+	public static final byte[] get9 = {ENQ, NUM, NUM, 0x30, 0x39, WAITTIME, 0x46, 0x41, TAIL};
+	
+	//参数14 适用负荷选择 H0E
+	public static final byte[] get14 = {ENQ, NUM, NUM, 0x30, 0x45, WAITTIME, 0x30, 0x36, TAIL};
+	
+	//参数71 适用电机 H47
+	public static final byte[] get71 = {ENQ, NUM, NUM, 0x34, 0x37, WAITTIME, 0x46, 0x43, TAIL};
 	
 	/**********校验和***********/
 	public static void getCheckSum(byte[] a) {
