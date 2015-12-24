@@ -7,6 +7,7 @@ import com.XD.inverterterminal.utils.SendUtils;
 import com.XD.inverterterminal.view.AlarmView;
 
 import android.R.color;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -14,8 +15,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import android.text.TextUtils;
 import android.view.Menu;
@@ -91,7 +95,7 @@ public class MainActivity extends Activity {
 				
 		mAlarmView = AlarmView.getInstance(this);
 		
-		sciModel = SciModel.getInstance(this);
+//		sciModel = SciModel.getInstance(this);
 		
 		//让edittext不获得焦点
 		mLayoutMain = (RelativeLayout)findViewById(R.id.layout_main);
@@ -111,6 +115,7 @@ public class MainActivity extends Activity {
 		loginModel = LoginModel.getInstance(this);
 	}
 
+	
 	//按键背景设为透明
 	private void setButtonBgTran() {
 		mBgRun.setBackgroundColor(color.transparent);
@@ -118,87 +123,140 @@ public class MainActivity extends Activity {
 		mBgStop.setBackgroundColor(color.transparent);
 	}
 	
-	private void registerBroadcast() {
-		try {
-			IntentFilter filter = new IntentFilter();
+//	private void registerBroadcast() {
+//		try {
+//			IntentFilter filter = new IntentFilter();
 
-			filter.addAction(SciModel.Data_ACK);
-			filter.addAction(SciModel.Data_NAK);
+//			filter.addAction(SciModel.Data_ACK);
+//			filter.addAction(SciModel.Data_NAK);
 			
-			filter.addAction(SciModel.Current_Refresh);
-			filter.addAction(SciModel.OutFrq_Refresh);
-			filter.addAction(SciModel.Status_Refresh);
-			filter.addAction(SciModel.Frq_Ram);
-			filter.addAction(SciModel.Frq_Prom);	
-			
-			filter.addAction(SciModel.Alarm);
-			filter.addAction(SciModel.Conn_Error);
-			filter.addAction(SciModel.Get_Alarm);
-			registerReceiver(mBroadcastReceiver, filter);
-		} catch (Exception e) {
-			// mBroadcastReceiver register failed
-			e.printStackTrace();
-		}
-	}
+//			filter.addAction(SciModel.Current_Refresh);
+//			filter.addAction(SciModel.OutFrq_Refresh);
+//			filter.addAction(SciModel.Status_Refresh);
+//			filter.addAction(SciModel.Frq_Ram);
+//			filter.addAction(SciModel.Frq_Prom);	
+//			
+//			filter.addAction(SciModel.Alarm);
+//			filter.addAction(SciModel.Conn_Error);
+//			filter.addAction(SciModel.Get_Alarm);
+//			registerReceiver(mBroadcastReceiver, filter);
+//		} catch (Exception e) {
+//			// mBroadcastReceiver register failed
+//			e.printStackTrace();
+//		}
+//	}
 	
-	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
-	{
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// TODO Auto-generated method stub
-			String action = intent.getAction();
-			//数据代码正确
-			if (action.equals(SciModel.Data_ACK)) {
-				Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
-				mLayoutMain.setClickable(true);
-			}
-			//数据代码错误
-			else if (action.equals(SciModel.Data_NAK)) {
-				String daErr = intent.getStringExtra("dataError");
-				Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
-				mLayoutMain.setClickable(true);
-			}
-			//变频器状态刷新
-			else if (action.equals(SciModel.Status_Refresh)) {
-				TextStatus.setText(intent.getStringExtra("status"));
-			} 
-			//电流刷新
-			else if (action.equals(SciModel.Current_Refresh)) {
-				TextCurrent.setText("" + (double)intent.getIntExtra("current", 0)/100.0);
-			}
-			//输出频率刷新
-			else if (action.equals(SciModel.OutFrq_Refresh)) {
-				TextVelocity.setText("" + (double)intent.getIntExtra("outFrq", 0)/100.0);
-			}
-			//RAM频率
-			else if (action.equals(SciModel.Frq_Ram)) {
-				mTextRam.setText("" + (double)intent.getIntExtra("frqRam", 0)/100.0);
-			}
-			//E2PROM频率
-			else if (action.equals(SciModel.Frq_Prom)) {
-				mTextProm.setText("" + (double)intent.getIntExtra("frqProm", 0)/100.0);
-			}
-			//报警状态
-			else if (action.equals(SciModel.Alarm)) {
-				TextStatus.setText(intent.getStringExtra("status"));
-				sciModel.setBtnClicked(SendUtils.numGetAlarm);
-			}
-			//连接错误
-			else if (action.equals(SciModel.Conn_Error)) {
-				if(++time == 10) {
-					time = 0;				
-					Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+	private Handler handler = new Handler() {
+		@SuppressLint("ShowToast")
+		public void handleMessage(Message msg)
+		{
+			if(sciModel.isSciOpened()) {
+				switch (msg.what)
+				{
+				case SciModel.Data_ACK:
+					Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
+					mLayoutMain.setClickable(true);
+					break;
+				case SciModel.Data_NAK:
+					String daErr = "";
+					if (msg.obj != null)
+						daErr = (String)msg.obj;
+					Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+					mLayoutMain.setClickable(true);
+					break;
+				case SciModel.Status_Refresh:
+					TextStatus.setText("正常工作");
+					break;
+				case SciModel.Current_Refresh:
+					TextCurrent.setText("" + (1.0f * (int)msg.arg1) /100);
+					break;
+				case SciModel.OutFrq_Refresh:
+					TextVelocity.setText("" + (1.0f * (int)msg.arg1) /100);
+					break;
+				case SciModel.Frq_Ram:
+					mTextRam.setText("" + (1.0f * (int)msg.arg1) /100);
+					break;
+				case SciModel.Frq_Prom:
+					mTextProm.setText("" + (1.0f * (int)msg.arg1) /100);
+					break;
+				case SciModel.Alarm:
+					TextStatus.setText("发生警报");
+					sciModel.setBtnClicked(SendUtils.numGetAlarm);
+				case SciModel.Conn_Error:
+					if(++time == 10) {
+						time = 0;				
+						Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+					}
+					mLayoutMain.setClickable(true);
+					break;
+				case SciModel.Get_Alarm:
+					int aCode = msg.arg1;
+					mAlarmView.show(aCode);
+					break;
 				}
-				mLayoutMain.setClickable(true);
-			}
-			//获取报警信息
-			else if (action.equals(SciModel.Get_Alarm)) {
-				int aCode = intent.getIntExtra("alarmCode", 0);
-				mAlarmView.show(aCode);
-			}
 			sciModel.setSendFlag(true);
+			}
 		}
 	};
+	
+//	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
+//	{
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			// TODO Auto-generated method stub
+//			String action = intent.getAction();
+//			//数据代码正确
+//			if (action.equals(SciModel.Data_ACK)) {
+//				Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
+//				mLayoutMain.setClickable(true);
+//			}
+//			//数据代码错误
+//			else if (action.equals(SciModel.Data_NAK)) {
+//				String daErr = intent.getStringExtra("dataError");
+//				Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+//				mLayoutMain.setClickable(true);
+//			}
+//			//变频器状态刷新
+//			else if (action.equals(SciModel.Status_Refresh)) {
+//				TextStatus.setText(intent.getStringExtra("status"));
+//			} 
+//			//电流刷新
+//			else if (action.equals(SciModel.Current_Refresh)) {
+//				TextCurrent.setText("" + (double)intent.getIntExtra("current", 0)/100.0);
+//			}
+//			//输出频率刷新
+//			else if (action.equals(SciModel.OutFrq_Refresh)) {
+//				TextVelocity.setText("" + (double)intent.getIntExtra("outFrq", 0)/100.0);
+//			}
+//			//RAM频率
+//			else if (action.equals(SciModel.Frq_Ram)) {
+//				mTextRam.setText("" + (double)intent.getIntExtra("frqRam", 0)/100.0);
+//			}
+//			//E2PROM频率
+//			else if (action.equals(SciModel.Frq_Prom)) {
+//				mTextProm.setText("" + (double)intent.getIntExtra("frqProm", 0)/100.0);
+//			}
+//			//报警状态
+//			else if (action.equals(SciModel.Alarm)) {
+//				TextStatus.setText(intent.getStringExtra("status"));
+//				sciModel.setBtnClicked(SendUtils.numGetAlarm);
+//			}
+//			//连接错误
+//			else if (action.equals(SciModel.Conn_Error)) {
+//				if(++time == 10) {
+//					time = 0;				
+//					Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+//				}
+//				mLayoutMain.setClickable(true);
+//			}
+//			//获取报警信息
+//			else if (action.equals(SciModel.Get_Alarm)) {
+//				int aCode = intent.getIntExtra("alarmCode", 0);
+//				mAlarmView.show(aCode);
+//			}
+//			sciModel.setSendFlag(true);
+//		}
+//	};
 	
 	public void onButtonClick(View v) {
 		if(sciModel.isSciOpened()) {
@@ -261,8 +319,7 @@ public class MainActivity extends Activity {
 			}
 			mLayoutMain.setClickable(false);
 		}
-		else Toast.makeText(this, "请先开启串口",
-				Toast.LENGTH_SHORT).show();
+		else Toast.makeText(this, "请先开启串口", Toast.LENGTH_SHORT).show();
 	}
 	
 	private void showAlertDialog() {
@@ -307,14 +364,14 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, "串口已开启",
 					Toast.LENGTH_SHORT).show();
 		else {
-			registerBroadcast();
+//			registerBroadcast();
 			sciModel.openSci();		
 		}
 	}
 	
 	private void close() {
 		if(sciModel.isSciOpened()) {
-			unregisterReceiver(mBroadcastReceiver);
+//			unregisterReceiver(mBroadcastReceiver);
 			sciModel.closeSci();
 		}
 	}
@@ -360,8 +417,9 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		sciModel = SciModel.getInstance(this);
+		sciModel.setHandler(handler);
 		if(sciModel.isSciOpened()) {
-			registerBroadcast();
+//			registerBroadcast();
 			sciModel.setSendFlag(true);
 		}
 	}
@@ -371,7 +429,7 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onPause();
 		if(sciModel.isSciOpened()) {
-			unregisterReceiver(mBroadcastReceiver);
+//			unregisterReceiver(mBroadcastReceiver);
 			//如果询问线程有开启，暂停
 			sciModel.setSendFlag(false);
 		}

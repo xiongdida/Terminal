@@ -51,6 +51,10 @@ public class ParaThread extends Thread {
 		}
 	}
 	
+	public void close() {
+		sendOnce = false;
+	}
+	
 	public void setSendFlag(boolean b) {
 		sendFlag = b;
 	}

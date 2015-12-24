@@ -15,6 +15,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +45,8 @@ public class SettingActivity extends Activity{
 	
 	private SciModel sciModel;
 	
+	private int time;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -68,7 +72,6 @@ public class SettingActivity extends Activity{
 		}
 		mAdapter.array = pas;
         listView.setAdapter(mAdapter);
-	
         
 	    listView.setOnItemClickListener(new OnItemClickListener()
 	    {
@@ -80,42 +83,81 @@ public class SettingActivity extends Activity{
 	    		else if(sciModel.isSciOpened()) showAlertDialog(position);
 	    	}
 	    });
-	    registerBroadcast();
+//	    registerBroadcast();
 	}
 
-	private void registerBroadcast() {
-		try {
-			IntentFilter filter = new IntentFilter();
-
-			filter.addAction(SciModel.Data_ACK);
-			filter.addAction(SciModel.Data_NAK);
-			
-			
-			filter.addAction(SciModel.Conn_Error);
-			registerReceiver(mBroadcastReceiver, filter);
-		} catch (Exception e) {
-			// mBroadcastReceiver register failed
-			e.printStackTrace();
-		}
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		sciModel.setHandler(handler);
 	}
 	
-	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
-	{
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// TODO Auto-generated method stub
-			String action = intent.getAction();
-			//数据代码正确
-			if (action.equals(SciModel.Data_ACK)) {
-				Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
-			}
-			//数据代码错误
-			else if (action.equals(SciModel.Data_NAK)) {
-				String daErr = intent.getStringExtra("dataError");
-				Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+//	private void registerBroadcast() {
+//		try {
+//			IntentFilter filter = new IntentFilter();
+//
+//			filter.addAction(SciModel.Data_ACK);
+//			filter.addAction(SciModel.Data_NAK);
+//			
+//			
+//			filter.addAction(SciModel.Conn_Error);
+//			registerReceiver(mBroadcastReceiver, filter);
+//		} catch (Exception e) {
+//			// mBroadcastReceiver register failed
+//			e.printStackTrace();
+//		}
+//	}
+	
+	private Handler handler = new Handler() {
+		public void handleMessage(Message msg)
+		{
+			if(sciModel.isSciOpened()) {
+				switch (msg.what)
+				{
+				case SciModel.Data_ACK:
+					Toast.makeText(getApplicationContext(), "参数设置正确", Toast.LENGTH_SHORT).show();
+					break;
+				case SciModel.Data_NAK:
+					String daErr = "";
+					if (msg.obj != null)
+						daErr = (String)msg.obj;
+					Toast.makeText(getApplicationContext(), "参数设置失败，数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+					break;
+//				case SciModel.Conn_Error:
+//					if(++time == 10) {
+//						time = 0;				
+//						Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+//					}
+//					break;
+				}
 			}
 		}
 	};
+	
+//	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver()
+//	{
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			// TODO Auto-generated method stub
+//			String action = intent.getAction();
+//			//数据代码正确
+//			if (action.equals(SciModel.Data_ACK)) {
+//				Toast.makeText(getApplicationContext(), "操作正确", Toast.LENGTH_SHORT).show();
+//			}
+//			//数据代码错误
+//			else if (action.equals(SciModel.Data_NAK)) {
+//				String daErr = intent.getStringExtra("dataError");
+//				Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+//			}
+//			else if (action.equals(SciModel.Conn_Error)) {
+//				if(++time == 10) {
+//					time = 0;				
+//					Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+//				}
+//			}
+//		}
+//	};
 	
 	private void showAlertDialog(final int a) {
 
@@ -179,8 +221,6 @@ public class SettingActivity extends Activity{
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		unregisterReceiver(mBroadcastReceiver);
+//		unregisterReceiver(mBroadcastReceiver);
 	}
-	
-	
 }

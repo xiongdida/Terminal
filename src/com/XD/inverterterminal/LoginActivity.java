@@ -3,7 +3,9 @@ package com.XD.inverterterminal;
 
 import com.XD.inverterterminal.model.LoginModel;
 import com.XD.inverterterminal.model.SciModel;
+import com.XD.inverterterminal.utils.SendUtils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,6 +27,7 @@ public class LoginActivity extends Activity{
 //	private EditText userName;
 	private EditText password;
 	private SharedPreferences.Editor editor;
+	private int time = 0;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -38,20 +42,8 @@ public class LoginActivity extends Activity{
 	
 		password = (EditText) findViewById(R.id.password_edit);
 		
-		sModel.getPara();
-//		mLoading = new LoadingView(this);
 	}
 	
-//	private void getPara() {
-//		// TODO Auto-generated method stub
-//		if(sModel.isSciOpened()) {
-//			SharedPreferences sPreferences = getSharedPreferences("para_info", 0);
-//			editor = sPreferences.edit();
-//			
-//			
-//		}
-//	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -64,7 +56,8 @@ public class LoginActivity extends Activity{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		sModel.setHandler(handler);
+		sModel.getPara();
 	}
 	
 	public void login(View v)
@@ -97,7 +90,7 @@ public class LoginActivity extends Activity{
 						LoginActivity.this.finish();
 						finish();
 					}
-				}, 1000);
+				}, 800);
 			} else if (action.equals(LoginModel.LOGIN_FAILED)) {
 				Toast.makeText(context, "登录失败", Toast.LENGTH_LONG).show();
 			}
@@ -106,5 +99,29 @@ public class LoginActivity extends Activity{
 			}
 		}
 
+	};
+	
+	private Handler handler = new Handler() {
+		public void handleMessage(Message msg)
+		{
+			if(sModel.isSciOpened()) {
+				switch (msg.what)
+				{
+				case SciModel.Data_NAK:
+					String daErr = "";
+					if (msg.obj != null)
+						daErr = (String)msg.obj;
+					Toast.makeText(getApplicationContext(), "数据错误为：" + daErr, Toast.LENGTH_LONG).show();
+					break;
+				case SciModel.Conn_Error:
+					if(++time == 10) {
+						time = 0;				
+						Toast.makeText(getApplicationContext(), "连接超时,检查连线", Toast.LENGTH_SHORT).show();
+					}
+					break;
+				}
+				sModel.closeParaThread();
+			}
+		}
 	};
 }
