@@ -99,7 +99,7 @@
             android:layout_gravity="center"
             android:textColor="#666666"
             android:textSize="18sp"
-            android:text="现值"/>
+            android:text="当前值"/>
         <TextView
             android:id="@+id/parameter_value"
             android:layout_width="wrap_content"

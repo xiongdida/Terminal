@@ -4,7 +4,7 @@
     <string name="app_name">InverterTerminal</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="text_head">变频器参数设置为：波特率9600，奇校验，数据位8位，停止位1位，站号为0</string>
+    <string name="text_head">变频器通讯参数设置为：波特率9600，奇校验，数据位8位，停止位1位，站号为0</string>
     <string name="openSCI_sucssess">串口开启成功</string>
     <string name="closeSCI_sucssess">关闭串口成功</string>
     <string name="text_status">变频器状态：</string>

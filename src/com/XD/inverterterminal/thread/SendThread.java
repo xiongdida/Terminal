@@ -1,6 +1,8 @@
 package com.XD.inverterterminal.thread;
 
 
+import android.util.Log;
+
 import com.XD.inverterterminal.model.SciModel;
 import com.XD.inverterterminal.utils.SendUtils;
 
@@ -42,6 +44,7 @@ public class SendThread extends Thread {
 						sModel.send(SendUtils.getFrqProm);
 						break;
 					}
+					Log.v("TimeCheck", "send");
 				}
 				else 
 //					switch(btnNum) {

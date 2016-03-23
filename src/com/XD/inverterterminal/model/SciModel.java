@@ -119,7 +119,8 @@ public class SciModel {
 					@Override
 					public void OnRecv(byte[] response) {
 						// TODO Auto-generated method stub
-						Log.d("receiveMsg", new String(response));
+//						Log.d("receiveMsg", new String(response));
+						Log.v("TimeCheck", new String(response));
 						parserResponse(response);
 					}
 

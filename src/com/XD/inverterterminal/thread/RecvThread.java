@@ -55,6 +55,7 @@ public class RecvThread extends Thread {
 					if(mListener != null) {
 						if (result!= null) {
 //							Log.d("receiveMsg", result.toString());
+							
 							mListener.OnRecv(result);
 						}
 						else mListener.OnConnError();
